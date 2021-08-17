@@ -54,5 +54,13 @@ resource "aws_acm_certificate_validation" "this" {
 }
 
 output "arn" {
-  value = aws_acm_certificate.this.arn
+  # Output the certificate only once it has been validated.
+  #
+  # Otherwise, Terraform may try to feed the certificate ARN to another
+  # resource (such as a load-balancer listener), which may be rejected because
+  # the certificate is not valid:
+  #
+  #   UnsupportedCertificate: The certificate 'XXX' must have a fully-qualified
+  #   domain name, a supported signature, and a supported key size.
+  value = aws_acm_certificate_validation.this.arn
 }
