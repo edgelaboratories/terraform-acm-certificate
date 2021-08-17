@@ -16,7 +16,7 @@ data "aws_route53_zone" "example" {
 }
 
 module "my_certificate" {
-  source = "git@github.com:edgelaboratories/terraform-modules.git//acm-certificate?ref=v9"
+  source = "git@github.com:edgelaboratories/terraform-acm-certificate.git?ref=v0.0.1"
 
   stack_id                 = "my-stack"
   name                     = "Toto Certificate"
