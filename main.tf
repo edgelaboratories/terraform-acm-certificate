@@ -62,5 +62,5 @@ output "arn" {
   #
   #   UnsupportedCertificate: The certificate 'XXX' must have a fully-qualified
   #   domain name, a supported signature, and a supported key size.
-  value = aws_acm_certificate_validation.this.arn
+  value = aws_acm_certificate_validation.this.certificate_arn
 }
