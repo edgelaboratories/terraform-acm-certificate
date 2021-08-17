@@ -1,5 +1,5 @@
 # Request a certificate for the specified domain name.
-resource aws_acm_certificate "this" {
+resource "aws_acm_certificate" "this" {
   domain_name       = var.domain_name
   validation_method = "DNS"
 
@@ -19,7 +19,7 @@ locals {
 }
 
 # Register records to prove we own the domain name
-resource aws_route53_record "verify" {
+resource "aws_route53_record" "verify" {
   # Following this
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-3-upgrade#resource-aws_acm_certificate
   # I would expect this to work:
@@ -47,7 +47,7 @@ resource aws_route53_record "verify" {
 }
 
 # Wait for the certificate to be issued
-resource aws_acm_certificate_validation "this" {
+resource "aws_acm_certificate_validation" "this" {
   certificate_arn = aws_acm_certificate.this.arn
   # validation_record_fqdns = [for record in aws_route53_record.verify : record.fqdn]
   validation_record_fqdns = aws_route53_record.verify[*].fqdn

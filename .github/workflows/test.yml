@@ -1,0 +1,28 @@
+name: Test
+
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        terraform-versions: [1.0.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ matrix['terraform-versions'] }}
+          terraform_wrapper: false
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v0.1.7
+        with:
+          github_token: ${{ github.token }}
