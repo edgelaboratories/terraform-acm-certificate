@@ -22,7 +22,14 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
+      - name: Terraform validate
+        id: validate
+        run: |
+          terraform init -backend=false
+          terraform validate
+
       - name: tfsec
+        id: tfsec
         uses: aquasecurity/tfsec-pr-commenter-action@v0.1.7
         with:
           github_token: ${{ github.token }}
