@@ -16,7 +16,7 @@ data "aws_route53_zone" "example" {
 }
 
 module "my_certificate" {
-  source = "git@github.com:edgelaboratories/terraform-acm-certificate.git?ref=v0.0.1"
+  source = "git@github.com:edgelaboratories/terraform-acm-certificate.git?ref=v0.0.2"
 
   stack_id                 = "my-stack"
   name                     = "Toto Certificate"
@@ -27,3 +27,5 @@ module "my_certificate" {
 ```
 
 You can use the `arn` output to access the ARN of the generated certificate.
+It will be usable only once the certificate has been successfully
+validated.
