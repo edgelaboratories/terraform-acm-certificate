@@ -30,6 +30,6 @@ jobs:
 
       - name: tfsec
         id: tfsec
-        uses: aquasecurity/tfsec-pr-commenter-action@v0.1.9
+        uses: aquasecurity/tfsec-pr-commenter-action@v0.1.10
         with:
           github_token: ${{ github.token }}
