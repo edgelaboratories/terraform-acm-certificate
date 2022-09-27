@@ -8,9 +8,7 @@ resource "aws_acm_certificate" "this" {
   }
 
   tags = {
-    Name    = var.name
-    Stack   = var.stack_id
-    Managed = "terraform"
+    Name = var.name
   }
 }
 

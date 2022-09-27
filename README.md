@@ -16,9 +16,8 @@ data "aws_route53_zone" "example" {
 }
 
 module "my_certificate" {
-  source = "git@github.com:edgelaboratories/terraform-acm-certificate.git?ref=v0.0.2"
+  source = "git@github.com:edgelaboratories/terraform-acm-certificate.git?ref=v0.1.0"
 
-  stack_id                 = "my-stack"
   name                     = "Toto Certificate"
   domain_name              = "toto.plop.${data.aws_route53_zone.public.name}"
   zone_id                  = data.aws_route53_zone.example.zone_id
