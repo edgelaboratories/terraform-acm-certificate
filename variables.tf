@@ -1,5 +1,3 @@
-variable "stack_id" {}
-
 variable "name" {
   description = "Pretty name of the record"
 }
