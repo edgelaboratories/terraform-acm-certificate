@@ -16,9 +16,9 @@ locals {
   dvo_list = [for dvo in aws_acm_certificate.this.domain_validation_options : dvo]
 }
 
-# Conditionally create the Route 53 record
+# Conditionally create the Route 53 record (skipped if validate_route53 is false)
 resource "aws_route53_record" "verify" {
-  count = var.create_record ? length(local.dvo_list) : 0
+  count = var.validate_route53 ? length(local.dvo_list) : 0
 
   name    = local.dvo_list[count.index].resource_record_name
   records = [local.dvo_list[count.index].resource_record_value]
@@ -27,14 +27,13 @@ resource "aws_route53_record" "verify" {
   ttl     = 60
 }
 
-# Conditionally wait for the certificate to be issued
+# Create the certificate validation, even if Route 53 records are not created
 resource "aws_acm_certificate_validation" "this" {
-  count = var.create_record ? 1 : 0
+  certificate_arn = aws_acm_certificate.this.arn
 
-  certificate_arn         = aws_acm_certificate.this.arn
-  validation_record_fqdns = aws_route53_record.verify[*].name
+  validation_record_fqdns = var.validate_route53 ? aws_route53_record.verify[*].name : [for dvo in local.dvo_list : dvo.resource_record_name]
 }
 
 output "arn" {
-  value = var.create_record && length(aws_acm_certificate_validation.this) > 0 ? aws_acm_certificate_validation.this[0].certificate_arn : null
+  value = aws_acm_certificate_validation.this.certificate_arn
 }

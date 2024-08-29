@@ -19,7 +19,7 @@ EOF
   default     = true
 }
 
-variable "create_record" {
+variable "validate_route53" {
   type    = bool
   default = true
 }
