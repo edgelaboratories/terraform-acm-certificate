@@ -18,3 +18,12 @@ See https://docs.aws.amazon.com/acm/latest/userguide/acm-concepts.html#concept-t
 EOF
   default     = true
 }
+
+variable "create_record_in_region" {
+  type    = bool
+  default = true
+}
+
+variable "region" {
+  type = string
+}
