@@ -19,11 +19,7 @@ EOF
   default     = true
 }
 
-variable "create_record_in_region" {
+variable "create_record" {
   type    = bool
   default = true
-}
-
-variable "region" {
-  type = string
 }

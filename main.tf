@@ -13,25 +13,28 @@ resource "aws_acm_certificate" "this" {
 }
 
 locals {
-  dvo = tolist(aws_acm_certificate.this.domain_validation_options)[0]
+  dvo_list = [for dvo in aws_acm_certificate.this.domain_validation_options : dvo]
 }
 
-# Create unique record name based on the region
+# Conditionally create the Route 53 record
 resource "aws_route53_record" "verify" {
-  for_each = var.create_record_in_region ? { for r in [var.region] : r => r } : {}
-  name     = local.dvo.resource_record_name
-  records  = [local.dvo.resource_record_value]
-  type     = local.dvo.resource_record_type
-  zone_id  = var.zone_id
-  ttl      = 60
+  count = var.create_record ? length(local.dvo_list) : 0
+
+  name    = local.dvo_list[count.index].resource_record_name
+  records = [local.dvo_list[count.index].resource_record_value]
+  type    = local.dvo_list[count.index].resource_record_type
+  zone_id = var.zone_id
+  ttl     = 60
 }
 
-# Wait for the certificate to be issued
+# Conditionally wait for the certificate to be issued
 resource "aws_acm_certificate_validation" "this" {
+  count = var.create_record ? 1 : 0
+
   certificate_arn         = aws_acm_certificate.this.arn
-  validation_record_fqdns = [for record in aws_route53_record.verify : record.fqdn]
+  validation_record_fqdns = aws_route53_record.verify[*].name
 }
 
 output "arn" {
-  value = aws_acm_certificate_validation.this.certificate_arn
+  value = var.create_record && length(aws_acm_certificate_validation.this) > 0 ? aws_acm_certificate_validation.this[0].certificate_arn : null
 }
