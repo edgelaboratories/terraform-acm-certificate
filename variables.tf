@@ -18,8 +18,3 @@ See https://docs.aws.amazon.com/acm/latest/userguide/acm-concepts.html#concept-t
 EOF
   default     = true
 }
-
-variable "validate_route53" {
-  type    = bool
-  default = true
-}

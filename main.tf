@@ -13,27 +13,52 @@ resource "aws_acm_certificate" "this" {
 }
 
 locals {
-  dvo_list = [for dvo in aws_acm_certificate.this.domain_validation_options : dvo]
+  dvo = tolist(aws_acm_certificate.this.domain_validation_options)[0]
 }
 
-# Conditionally create the Route 53 record (skipped if validate_route53 is false)
+# Register records to prove we own the domain name
 resource "aws_route53_record" "verify" {
-  count = var.validate_route53 ? length(local.dvo_list) : 0
+  # Following this
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-3-upgrade#resource-aws_acm_certificate
+  # I would expect this to work:
 
-  name    = local.dvo_list[count.index].resource_record_name
-  records = [local.dvo_list[count.index].resource_record_value]
-  type    = local.dvo_list[count.index].resource_record_type
+  # for_each = {
+  #   for dvo in aws_acm_certificate.this.domain_validation_options : dvo.domain_name => {
+  #     name   = dvo.resource_record_name
+  #     record = dvo.resource_record_value
+  #     type   = dvo.resource_record_type
+  #   }
+  # }
+
+  # name    = each.value.name
+  # records = [each.value.record]
+  # type    = each.value.type
+  # zone_id = var.zone_id
+  # ttl     = 60
+
+  # But it doesn't, so I just copied https://github.com/terraform-providers/terraform-provider-aws/issues/14447
+  name    = local.dvo.resource_record_name
+  records = [local.dvo.resource_record_value]
+  type    = local.dvo.resource_record_type
   zone_id = var.zone_id
   ttl     = 60
 }
 
-# Create the certificate validation, even if Route 53 records are not created
+# Wait for the certificate to be issued
 resource "aws_acm_certificate_validation" "this" {
   certificate_arn = aws_acm_certificate.this.arn
-
-  validation_record_fqdns = var.validate_route53 ? aws_route53_record.verify[*].name : [for dvo in local.dvo_list : dvo.resource_record_name]
+  # validation_record_fqdns = [for record in aws_route53_record.verify : record.fqdn]
+  validation_record_fqdns = aws_route53_record.verify[*].fqdn
 }
 
 output "arn" {
+  # Output the certificate only once it has been validated.
+  #
+  # Otherwise, Terraform may try to feed the certificate ARN to another
+  # resource (such as a load-balancer listener), which may be rejected because
+  # the certificate is not valid:
+  #
+  #   UnsupportedCertificate: The certificate 'XXX' must have a fully-qualified
+  #   domain name, a supported signature, and a supported key size.
   value = aws_acm_certificate_validation.this.certificate_arn
 }
