@@ -10,7 +10,7 @@ jobs:
         terraform-versions: [1.0.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
